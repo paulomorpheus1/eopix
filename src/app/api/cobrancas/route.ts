@@ -17,6 +17,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
+  const { count } = await supabase
+    .from('cobrancas')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('status')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .gte('current_period_end', new Date().toISOString())
+    .maybeSingle()
+
+  const isFree = (count || 0) < 3
+  const isSubscribed = !!sub
+
+  if (!isFree && !isSubscribed) {
+    return NextResponse.json({
+      error: 'Limite grátis atingido',
+      code: 'subscription_required',
+      used: count,
+      limit: 3,
+    }, { status: 402 })
+  }
+
   const body = await request.json()
   const { clientName, clientPhone, clientWhatsapp, value, description, dueDate } = body
 

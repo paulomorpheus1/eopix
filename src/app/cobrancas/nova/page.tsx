@@ -58,6 +58,11 @@ export default function NovaCobrancaPage() {
 
     const data = await res.json()
     if (!res.ok) {
+      if (data.code === 'subscription_required') {
+        setError('Limite grátis de 3 cobranças atingido. Assine por R$14,90/mês para cobranças ilimitadas.')
+        setLoading(false)
+        return
+      }
       setError(data.error || 'Erro ao criar cobrança')
       setLoading(false)
       return
