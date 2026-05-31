@@ -58,6 +58,22 @@ export async function createCustomer(data: {
   })
 }
 
+export async function findCustomerByEmail(email: string): Promise<AsaasCustomer | null> {
+  const result = await asaasFetch<{ data: AsaasCustomer[] }>(`/customers?email=${encodeURIComponent(email)}`)
+  return result.data?.[0] || null
+}
+
+export async function findOrCreateCustomer(data: {
+  name: string
+  email: string
+  phone: string
+  cpfCnpj: string
+}): Promise<AsaasCustomer> {
+  const existing = await findCustomerByEmail(data.email)
+  if (existing) return existing
+  return createCustomer(data)
+}
+
 export async function createPixPayment(data: {
   customer: string
   value: number

@@ -26,8 +26,8 @@ export default function NovaCobrancaPage() {
     setLoading(true)
     setError('')
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
       setError('Usuário não autenticado')
       setLoading(false)
       return
@@ -40,19 +40,25 @@ export default function NovaCobrancaPage() {
       return
     }
 
-    const { error } = await supabase.from('cobrancas').insert({
-      user_id: user.id,
-      client_name: form.client_name,
-      client_phone: form.client_phone.replace(/\D/g, ''),
-      client_whatsapp: form.client_whatsapp.replace(/\D/g, ''),
-      value,
-      description: form.description,
-      due_date: form.due_date,
-      status: 'pending',
+    const res = await fetch('/api/cobrancas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        clientName: form.client_name,
+        clientPhone: form.client_phone,
+        clientWhatsapp: form.client_whatsapp,
+        value,
+        description: form.description,
+        dueDate: form.due_date,
+      }),
     })
 
-    if (error) {
-      setError(error.message)
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error || 'Erro ao criar cobrança')
       setLoading(false)
       return
     }

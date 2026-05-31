@@ -34,14 +34,28 @@ export default function CobrancaDetailPage() {
   async function handleSend() {
     if (!cobranca) return
 
-    const msg = encodeURIComponent(
-      `Olá ${cobranca.client_name}! 👋\n\n` +
-      `Lembrando da sua cobrança de *${formatCurrency(cobranca.value)}* referente a "${cobranca.description}".\n\n` +
-      `📱 PIX: ${cobranca.pix_copy_paste || 'Chave disponível no app'}\n\n` +
-      `Qualquer dúvida, estou à disposição. 👍`
-    )
+    const value = formatCurrency(cobranca.value)
+    const pixKey = cobranca.pix_copy_paste || ''
+    const date = formatDate(cobranca.due_date)
 
-    window.open(`https://wa.me/${cobranca.client_whatsapp}?text=${msg}`, '_blank')
+    let msg = `*EoPIX* 💸 - Lembrete de cobrança\n\n`
+    msg += `Olá *${cobranca.client_name}*! 👋\n\n`
+    msg += `Valor: *${value}*\n`
+    msg += `Vencimento: *${date}*\n`
+    msg += `Descrição: ${cobranca.description}\n\n`
+
+    if (pixKey) {
+      msg += `💳 *PIX (copia e cola):*\n\`${pixKey}\`\n\n`
+      msg += `Ou use o QR Code na próxima mensagem.\n\n`
+    } else {
+      msg += `💳 *PIX:* disponível no app EoPIX\n\n`
+    }
+
+    msg += `Após o pagamento, envie o comprovante por aqui. ✅\n`
+    msg += `Qualquer dúvida, é só responder. 👍`
+
+    const encoded = encodeURIComponent(msg)
+    window.open(`https://wa.me/${cobranca.client_whatsapp}?text=${encoded}`, '_blank')
 
     await supabase
       .from('cobrancas')
@@ -111,22 +125,48 @@ export default function CobrancaDetailPage() {
           </div>
         </div>
 
-        {cobranca.pix_qr_code && (
-          <div className="mt-6 text-center">
-            <p className="mb-2 text-sm font-medium text-gray-700">QR Code PIX</p>
-            <img
-              src={cobranca.pix_qr_code}
-              alt="PIX QR Code"
-              className="mx-auto h-48 w-48 rounded-lg border border-gray-200"
-            />
-            {cobranca.pix_copy_paste && (
-              <button
-                onClick={() => navigator.clipboard.writeText(cobranca.pix_copy_paste!)}
-                className="mt-2 text-sm text-eopix-600 hover:text-eopix-700"
-              >
-                Copiar chave PIX
-              </button>
+        {cobranca.pix_qr_code || cobranca.pix_copy_paste ? (
+          <div className="mt-6 rounded-xl border-2 border-eopix-100 bg-eopix-50 p-6">
+            <p className="mb-4 text-center text-sm font-semibold text-eopix-800">
+              💳 Pagamento via PIX
+            </p>
+            {cobranca.pix_qr_code && (
+              <div className="text-center">
+                <img
+                  src={cobranca.pix_qr_code}
+                  alt="PIX QR Code"
+                  className="mx-auto h-48 w-48 rounded-lg border-2 border-white bg-white shadow-sm"
+                />
+              </div>
             )}
+            {cobranca.pix_copy_paste && (
+              <div className="mt-4 text-center">
+                <p className="mb-2 text-xs text-eopix-700">Ou copie a chave PIX:</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={cobranca.pix_copy_paste}
+                    className="flex-1 rounded-lg border border-eopix-200 bg-white px-3 py-2 text-xs font-mono text-gray-700"
+                  />
+                  <button
+                    onClick={() => navigator.clipboard.writeText(cobranca.pix_copy_paste!)}
+                    className="rounded-lg bg-eopix-600 px-4 py-2 text-sm font-medium text-white hover:bg-eopix-700"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-xl border-2 border-dashed border-yellow-300 bg-yellow-50 p-6">
+            <p className="text-center text-sm font-medium text-yellow-800">
+              ⚠️ PIX ainda não gerado
+            </p>
+            <p className="mt-1 text-center text-xs text-yellow-600">
+              Clique em "Enviar WhatsApp" para gerar o PIX automaticamente.
+            </p>
           </div>
         )}
 
