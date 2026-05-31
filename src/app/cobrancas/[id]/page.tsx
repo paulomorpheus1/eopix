@@ -135,9 +135,38 @@ export default function CobrancaDetailPage() {
             <>
               <button
                 onClick={handleSend}
-                className="rounded-lg bg-eopix-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-eopix-700"
+                className="rounded-lg bg-eopix-600 px-8 py-3 text-base font-semibold text-white shadow-sm hover:bg-eopix-700"
               >
                 Enviar WhatsApp agora
+              </button>
+              <div className="relative group">
+                <button className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  ...
+                </button>
+                <div className="absolute right-0 top-full z-10 mt-1 hidden min-w-[180px] rounded-lg border border-gray-200 bg-white shadow-lg group-hover:block">
+                  <button
+                    onClick={handleMarkPaid}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-green-700 hover:bg-green-50"
+                  >
+                    ✓ Marcar como paga
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    ✕ Cancelar cobrança
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+          {cobranca.status === 'sent' && (
+            <>
+              <button
+                onClick={handleSend}
+                className="rounded-lg border border-eopix-300 bg-eopix-50 px-6 py-2.5 text-sm font-medium text-eopix-700 hover:bg-eopix-100"
+              >
+                Reenviar WhatsApp
               </button>
               <button
                 onClick={handleMarkPaid}
@@ -145,23 +174,13 @@ export default function CobrancaDetailPage() {
               >
                 Marcar como paga
               </button>
+              <button
+                onClick={handleCancel}
+                className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
             </>
-          )}
-          {['pending', 'sent'].includes(cobranca.status) && (
-            <button
-              onClick={handleCancel}
-              className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar cobrança
-            </button>
-          )}
-          {cobranca.status === 'sent' && (
-            <button
-              onClick={handleSend}
-              className="rounded-lg border border-eopix-300 bg-eopix-50 px-6 py-2.5 text-sm font-medium text-eopix-700 hover:bg-eopix-100"
-            >
-              Reenviar WhatsApp
-            </button>
           )}
         </div>
       </div>
