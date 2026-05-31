@@ -1,0 +1,15 @@
+name: EoPIX Cron - Process Cobrancas
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # Every 2 hours
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call EoPIX cron endpoint
+        run: |
+          curl -X GET "https://eopix-nine.vercel.app/api/cron/process" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
